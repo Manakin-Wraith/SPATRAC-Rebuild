@@ -163,62 +163,80 @@ def dashboard_home():
     }
     
     /* Status-specific button styles */
-    .btn-good button {
+    .status-good div[data-testid="stButton"] button {
         background-color: rgba(76, 175, 80, 0.3) !important;
         border: 1px solid rgba(76, 175, 80, 0.5) !important;
     }
     
-    .btn-good button:hover {
+    .status-good div[data-testid="stButton"] button:hover {
         background-color: rgba(76, 175, 80, 0.5) !important;
         border: 1px solid rgba(76, 175, 80, 0.7) !important;
     }
     
-    .btn-warning button {
+    .status-warning div[data-testid="stButton"] button {
         background-color: rgba(255, 167, 38, 0.3) !important;
         border: 1px solid rgba(255, 167, 38, 0.5) !important;
     }
     
-    .btn-warning button:hover {
+    .status-warning div[data-testid="stButton"] button:hover {
         background-color: rgba(255, 167, 38, 0.5) !important;
         border: 1px solid rgba(255, 167, 38, 0.7) !important;
     }
     
-    .btn-critical button {
+    .status-critical div[data-testid="stButton"] button {
         background-color: rgba(244, 67, 54, 0.3) !important;
         border: 1px solid rgba(244, 67, 54, 0.5) !important;
     }
     
-    .btn-critical button:hover {
+    .status-critical div[data-testid="stButton"] button:hover {
         background-color: rgba(244, 67, 54, 0.5) !important;
         border: 1px solid rgba(244, 67, 54, 0.7) !important;
     }
     
-    .btn-info button {
+    .status-info div[data-testid="stButton"] button {
         background-color: rgba(33, 150, 243, 0.3) !important;
         border: 1px solid rgba(33, 150, 243, 0.5) !important;
     }
     
-    .btn-info button:hover {
+    .status-info div[data-testid="stButton"] button:hover {
         background-color: rgba(33, 150, 243, 0.5) !important;
         border: 1px solid rgba(33, 150, 243, 0.7) !important;
     }
     
-    .btn-neutral button {
+    .status-neutral div[data-testid="stButton"] button {
         background-color: rgba(96, 125, 139, 0.3) !important;
         border: 1px solid rgba(96, 125, 139, 0.5) !important;
     }
     
-    .btn-neutral button:hover {
+    .status-neutral div[data-testid="stButton"] button:hover {
         background-color: rgba(96, 125, 139, 0.5) !important;
         border: 1px solid rgba(96, 125, 139, 0.7) !important;
+    }
+    
+    /* Custom header styling */
+    h1 {
+        font-size: 2.8rem !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        margin-bottom: 0.5rem !important;
+        letter-spacing: 1px !important;
+    }
+    
+    h3.refresh-time {
+        font-size: 0.9rem !important;
+        font-weight: 400 !important;
+        color: #78909C !important;
+        text-align: center !important;
+        margin-top: 0 !important;
+        margin-bottom: 2rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
     st.header("DASHBOARD")
     
-    # Display current date and time
-    st.subheader(f"Refreshed at  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    # Display current date and time with custom styling
+    st.markdown(f'<h3 class="refresh-time">Refreshed at {datetime.now().strftime("%Y-%m-%d %H:%M")}</h3>', unsafe_allow_html=True)
     
     # Quality Checks metrics as the main metric
     st.markdown("### Quality Control Performance")
@@ -252,12 +270,8 @@ def dashboard_home():
                     st.metric("Products Checked", f"{quality_data['products_checked'].iloc[0]:,d}")
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown('<div class="btn-good">', unsafe_allow_html=True)
-                    if st.button("View details in Quality Control", key="quality_btn"):
-                        st.switch_page("pages/04_quality_control.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Quality Control", key="quality_btn"):
+                    st.switch_page("pages/04_quality_control.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
         else:
@@ -269,12 +283,8 @@ def dashboard_home():
                 st.markdown("<p class='metric-subtitle'>No quality checks performed in the last 30 days</p>", unsafe_allow_html=True)
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
-                    if st.button("View details in Quality Control", key="quality_no_data_btn"):
-                        st.switch_page("pages/04_quality_control.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Quality Control", key="quality_no_data_btn"):
+                    st.switch_page("pages/04_quality_control.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
@@ -356,12 +366,8 @@ def dashboard_home():
             st.markdown(f"<p class='metric-subtitle'>{warning_text}</p>", unsafe_allow_html=True)
             
             # Navigation button
-            btn_container = st.container()
-            with btn_container:
-                st.markdown(f'<div class="btn-{get_button_class(status_text)}">', unsafe_allow_html=True)
-                if st.button("View details in Expiry Management", key="expiry_btn"):
-                    st.switch_page("pages/03_expiry_management.py")
-                st.markdown('</div>', unsafe_allow_html=True)
+            if st.button("View details in Expiry Management", key="expiry_btn"):
+                st.switch_page("pages/03_expiry_management.py")
             
             st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
@@ -428,12 +434,8 @@ def dashboard_home():
                     st.markdown(f"<p class='metric-subtitle'>{delivery_info}</p>", unsafe_allow_html=True)
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown('<div class="btn-info">', unsafe_allow_html=True)
-                    if st.button("View details in Products Management", key="products_btn"):
-                        st.switch_page("pages/02_products.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Products Management", key="products_btn"):
+                    st.switch_page("pages/02_products.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
         else:
@@ -446,12 +448,8 @@ def dashboard_home():
                 st.markdown(f"<p class='metric-subtitle'>Total Products in System: {total_products:,d}</p>", unsafe_allow_html=True)
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
-                    if st.button("View details in Products Management", key="products_no_data_btn"):
-                        st.switch_page("pages/02_products.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Products Management", key="products_no_data_btn"):
+                    st.switch_page("pages/02_products.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
@@ -525,12 +523,8 @@ def dashboard_home():
                     st.metric("Low Stock Items", f"{low_stock_items:,d}")
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown(f'<div class="btn-{get_button_class(status_text)}">', unsafe_allow_html=True)
-                    if st.button("View details in Inventory", key="inventory_btn"):
-                        st.switch_page("pages/01_inventory.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Inventory", key="inventory_btn"):
+                    st.switch_page("pages/01_inventory.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
         else:
@@ -542,12 +536,8 @@ def dashboard_home():
                 st.markdown("<p class='metric-subtitle'>No inventory data available</p>", unsafe_allow_html=True)
                 
                 # Navigation button
-                btn_container = st.container()
-                with btn_container:
-                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
-                    if st.button("View details in Inventory", key="inventory_no_data_btn"):
-                        st.switch_page("pages/01_inventory.py")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("View details in Inventory", key="inventory_no_data_btn"):
+                    st.switch_page("pages/01_inventory.py")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
