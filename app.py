@@ -78,19 +78,147 @@ def check_required_tables():
         logger.error(f"Error checking required tables: {e}")
         return False
 
+def get_button_class(status_text):
+    if status_text == "Critical":
+        return "critical"
+    elif status_text == "Warning":
+        return "warning"
+    elif status_text == "Good":
+        return "good"
+    else:
+        return "neutral"
+
 def dashboard_home():
     """Display the main dashboard home page with key metrics and charts."""
-    # Add custom CSS for Poppins font
+    # Add custom CSS for styling
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    .metric-card {
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+    
+    /* Status-specific card styles */
+    .status-good {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    }
+    
+    .status-warning {
+        background: linear-gradient(135deg, #FFA726, #E65100);
+    }
+    
+    .status-critical {
+        background: linear-gradient(135deg, #FF5252, #B71C1C);
+    }
+    
+    .status-info {
+        background: linear-gradient(135deg, #2196F3, #0D47A1);
+    }
+    
+    .status-neutral {
+        background: linear-gradient(135deg, #607D8B, #455A64);
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Custom styling for the metrics */
+    div[data-testid="stMetric"] {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    /* Make buttons more prominent */
+    div[data-testid="stButton"] button {
+        width: 100%;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s;
+    }
+    
+    div[data-testid="stButton"] button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Status-specific button styles */
+    .btn-good button {
+        background-color: rgba(76, 175, 80, 0.3) !important;
+        border: 1px solid rgba(76, 175, 80, 0.5) !important;
+    }
+    
+    .btn-good button:hover {
+        background-color: rgba(76, 175, 80, 0.5) !important;
+        border: 1px solid rgba(76, 175, 80, 0.7) !important;
+    }
+    
+    .btn-warning button {
+        background-color: rgba(255, 167, 38, 0.3) !important;
+        border: 1px solid rgba(255, 167, 38, 0.5) !important;
+    }
+    
+    .btn-warning button:hover {
+        background-color: rgba(255, 167, 38, 0.5) !important;
+        border: 1px solid rgba(255, 167, 38, 0.7) !important;
+    }
+    
+    .btn-critical button {
+        background-color: rgba(244, 67, 54, 0.3) !important;
+        border: 1px solid rgba(244, 67, 54, 0.5) !important;
+    }
+    
+    .btn-critical button:hover {
+        background-color: rgba(244, 67, 54, 0.5) !important;
+        border: 1px solid rgba(244, 67, 54, 0.7) !important;
+    }
+    
+    .btn-info button {
+        background-color: rgba(33, 150, 243, 0.3) !important;
+        border: 1px solid rgba(33, 150, 243, 0.5) !important;
+    }
+    
+    .btn-info button:hover {
+        background-color: rgba(33, 150, 243, 0.5) !important;
+        border: 1px solid rgba(33, 150, 243, 0.7) !important;
+    }
+    
+    .btn-neutral button {
+        background-color: rgba(96, 125, 139, 0.3) !important;
+        border: 1px solid rgba(96, 125, 139, 0.5) !important;
+    }
+    
+    .btn-neutral button:hover {
+        background-color: rgba(96, 125, 139, 0.5) !important;
+        border: 1px solid rgba(96, 125, 139, 0.7) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
     
-    st.header("Overview")
+    st.header("DASHBOARD")
     
     # Display current date and time
-    st.subheader(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    st.subheader(f"Refreshed at  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     
     # Quality Checks metrics as the main metric
     st.markdown("### Quality Control Performance")
@@ -111,47 +239,44 @@ def dashboard_home():
         if not quality_data.empty and quality_data['total_checks'].iloc[0] > 0:
             pass_percentage = (quality_data['passed_checks'].iloc[0] / quality_data['total_checks'].iloc[0]) * 100
             
-            # Create a full-width container for the main metric
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #4CAF50, #2E7D32); 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 4rem; font-weight: bold; margin-bottom: 5px;">{pass_percentage:.1f}%</div>
-                <div style="font-size: 1.5rem; margin-bottom: 15px;">Quality Checks Passed</div>
-                <div style="display: flex; justify-content: center; gap: 30px; font-size: 1.1rem;">
-                    <div>
-                        <div style="font-weight: bold;">{quality_data['total_checks'].iloc[0]:,d}</div>
-                        <div>Total Checks</div>
-                    </div>
-                    <div>
-                        <div style="font-weight: bold;">{quality_data['products_checked'].iloc[0]:,d}</div>
-                        <div>Products Checked</div>
-                    </div>
-                </div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">
-                    <a href="pages/03_quality_control.py" style="color: white; text-decoration: underline;">
-                        View details in Quality Control
-                    </a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=300)
+            # Create a container with custom styling
+            with st.container():
+                st.markdown('<div class="metric-card status-good">', unsafe_allow_html=True)
+                
+                st.metric("Quality Checks Passed", f"{pass_percentage:.1f}%")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Checks", f"{quality_data['total_checks'].iloc[0]:,d}")
+                with col2:
+                    st.metric("Products Checked", f"{quality_data['products_checked'].iloc[0]:,d}")
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown('<div class="btn-good">', unsafe_allow_html=True)
+                    if st.button("View details in Quality Control", key="quality_btn"):
+                        st.switch_page("pages/04_quality_control.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #607D8B, #455A64); 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 4rem; font-weight: bold; margin-bottom: 5px;">N/A</div>
-                <div style="font-size: 1.5rem; margin-bottom: 15px;">Quality Checks Passed</div>
-                <div style="font-size: 1.1rem;">No quality checks performed in the last 30 days</div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">
-                    <a href="pages/03_quality_control.py" style="color: white; text-decoration: underline;">
-                        View details in Quality Control
-                    </a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=300)
+            # Gray container for no data
+            with st.container():
+                st.markdown('<div class="metric-card status-neutral">', unsafe_allow_html=True)
+                
+                st.metric("Quality Checks Passed", "N/A")
+                st.markdown("<p class='metric-subtitle'>No quality checks performed in the last 30 days</p>", unsafe_allow_html=True)
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
+                    if st.button("View details in Quality Control", key="quality_no_data_btn"):
+                        st.switch_page("pages/04_quality_control.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
         logger.error(f"Error loading quality checks metrics: {e}")
         st.error("Error loading quality checks data")
@@ -195,62 +320,50 @@ def dashboard_home():
             days_until_earliest = (earliest_expiry - pd.Timestamp.now().date()).days
         
         # Determine the status color based on expired and expiring soon counts
+        card_class = "status-neutral"
+        status_text = "No Data"
+        warning_text = "No products with expiry dates found in inventory"
+        
         if expired_count > 0 or expiring_soon_count > 0:
-            # Determine the background color gradient based on the status
             if expired_count > 0:
-                # Red gradient for expired products
-                bg_gradient = "linear-gradient(135deg, #FF5252, #B71C1C)"
+                card_class = "status-critical"
                 status_text = "Critical"
                 warning_text = f"⚠️ {expired_count} products have expired and need immediate attention!"
             elif expiring_soon_count > 0:
-                # Orange/yellow gradient for products expiring soon
-                bg_gradient = "linear-gradient(135deg, #FFA726, #E65100)"
+                card_class = "status-warning"
                 status_text = "Warning"
                 if earliest_expiry and days_until_earliest is not None:
                     warning_text = f"⚠️ {expiring_soon_count} products are expiring within the next 30 days. Earliest expiry in {days_until_earliest} days."
                 else:
                     warning_text = f"⚠️ {expiring_soon_count} products are expiring within the next 30 days."
             else:
-                # Green gradient for good status
-                bg_gradient = "linear-gradient(135deg, #4CAF50, #2E7D32)"
+                card_class = "status-good"
                 status_text = "Good"
                 warning_text = "✅ No products expiring soon."
+        
+        # Create a container with custom styling
+        with st.container():
+            st.markdown(f'<div class="metric-card {card_class}">', unsafe_allow_html=True)
             
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: {bg_gradient}; 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Product Expiry Status: {status_text}</div>
-                <div style="display: flex; justify-content: center; gap: 30px; font-size: 1.1rem; margin-top: 20px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">
-                    <div>
-                        <div style="font-size: 2.5rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{expired_count}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Expired Products</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 2.5rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{expiring_soon_count}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Expiring Within 30 Days</div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; font-size: 1.1rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{warning_text}</div>
-                <div style="margin-top: 10px; font-size: 0.9rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">
-                    <a href="pages/03_expiry_management.py" style="color: white; text-decoration: underline;">
-                        View details in Expiry Management
-                    </a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=300)
-        else:
-            # Gray gradient for no data
-            html_content = """
-            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #607D8B, #455A64); 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Product Expiry Status: No Data</div>
-                <div style="font-size: 1.5rem; margin-bottom: 15px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">No products with expiry dates found in inventory</div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=300)
+            st.metric("Product Expiry Status", status_text)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Expired Products", f"{expired_count}")
+            with col2:
+                st.metric("Expiring Within 30 Days", f"{expiring_soon_count}")
+            
+            st.markdown(f"<p class='metric-subtitle'>{warning_text}</p>", unsafe_allow_html=True)
+            
+            # Navigation button
+            btn_container = st.container()
+            with btn_container:
+                st.markdown(f'<div class="btn-{get_button_class(status_text)}">', unsafe_allow_html=True)
+                if st.button("View details in Expiry Management", key="expiry_btn"):
+                    st.switch_page("pages/03_expiry_management.py")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
         logger.error(f"Error loading product expiry metrics: {e}")
         st.error("Error loading product expiry data")
@@ -280,9 +393,6 @@ def dashboard_home():
         total_products = products_data['count'].iloc[0] if not products_data.empty else 0
         
         if not received_data.empty and received_data['count'].iloc[0] > 0:
-            # Blue gradient for delivery metrics
-            bg_gradient = "linear-gradient(135deg, #2196F3, #0D47A1)"
-            
             # Calculate days since last delivery
             latest_delivery = received_data['latest_delivery'].iloc[0]
             days_since_delivery = None
@@ -302,49 +412,48 @@ def dashboard_home():
                 else:
                     delivery_info = f"Last delivery: {days_since_delivery} days ago"
             
-            # Calculate percentage of products that received deliveries
-            unique_products = received_data['unique_products'].iloc[0]
-            product_percentage = (unique_products / total_products * 100) if total_products > 0 else 0
-            
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: {bg_gradient}; 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Delivery Performance</div>
-                <div style="font-size: 3rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{received_data['count'].iloc[0]:,d}</div>
+            # Create a container with custom styling
+            with st.container():
+                st.markdown('<div class="metric-card status-info">', unsafe_allow_html=True)
                 
-                <div style="display: flex; justify-content: center; gap: 40px; font-size: 1.1rem; margin-top: 20px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">
-                    <div>
-                        <div style="font-size: 1.8rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{received_data['total_quantity'].iloc[0]:,.2f}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Total Quantity</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.8rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{total_products:,d}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Total Products</div>
-                    </div>
-                </div>
+                st.metric("Delivery Performance", f"{received_data['count'].iloc[0]:,d}")
                 
-                <div style="margin-top: 10px; font-size: 0.9rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif; padding-bottom: 10px;">
-                    <a href="pages/02_products.py" style="color: white; text-decoration: underline; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">View details in Products Management</a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=320)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Quantity", f"{received_data['total_quantity'].iloc[0]:,.2f}")
+                with col2:
+                    st.metric("Total Products", f"{total_products:,d}")
+                
+                if delivery_info:
+                    st.markdown(f"<p class='metric-subtitle'>{delivery_info}</p>", unsafe_allow_html=True)
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown('<div class="btn-info">', unsafe_allow_html=True)
+                    if st.button("View details in Products Management", key="products_btn"):
+                        st.switch_page("pages/02_products.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
-            # Gray gradient for no data
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #607D8B, #455A64); 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Delivery Performance</div>
-                <div style="font-size: 1.5rem; margin-bottom: 15px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">No Deliveries in Last 30 Days</div>
-                <div style="font-size: 1.1rem; margin-top: 10px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Total Products in System: {total_products:,d}</div>
-                <div style="margin-top: 10px; font-size: 0.9rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif; padding-bottom: 10px;">
-                    <a href="pages/02_products.py" style="color: white; text-decoration: underline; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">View details in Products Management</a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=320)
+            # Gray container for no data
+            with st.container():
+                st.markdown('<div class="metric-card status-neutral">', unsafe_allow_html=True)
+                
+                st.metric("Delivery Performance", "No Deliveries")
+                st.markdown("<p class='metric-subtitle'>No Deliveries in Last 30 Days</p>", unsafe_allow_html=True)
+                st.markdown(f"<p class='metric-subtitle'>Total Products in System: {total_products:,d}</p>", unsafe_allow_html=True)
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
+                    if st.button("View details in Products Management", key="products_no_data_btn"):
+                        st.switch_page("pages/02_products.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
         logger.error(f"Error loading received products metrics: {e}")
         st.error("Error loading delivery data")
@@ -394,57 +503,53 @@ def dashboard_home():
             
             # Determine status color based on low stock percentage
             if low_stock_percentage >= 20:
-                bg_gradient = "linear-gradient(135deg, #F44336, #B71C1C)"  # Red for critical
+                card_class = "status-critical"
                 status_text = "Critical"
             elif low_stock_percentage >= 10:
-                bg_gradient = "linear-gradient(135deg, #FF9800, #E65100)"  # Orange for warning
+                card_class = "status-warning"
                 status_text = "Warning"
             else:
-                bg_gradient = "linear-gradient(135deg, #4CAF50, #2E7D32)"  # Green for good
+                card_class = "status-good"
                 status_text = "Good"
             
-            # Format sales data
-            sales_count = sales_data['sales_count'].iloc[0] if has_sales_data else 0
-            sales_quantity = sales_data['sales_quantity'].iloc[0] if has_sales_data else 0
-            
-            # Create HTML content that matches the style of other metrics
-            html_content = f"""
-            <div style="text-align: center; padding: 25px; background: {bg_gradient}; 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Inventory Status: {status_text}</div>
+            # Create a container with custom styling
+            with st.container():
+                st.markdown(f'<div class="metric-card {card_class}">', unsafe_allow_html=True)
                 
-                <div style="display: flex; justify-content: center; gap: 40px; font-size: 1.1rem; margin-top: 20px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">
-                    <div>
-                        <div style="font-size: 1.8rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{total_quantity:,.2f}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Total Stock Quantity</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.8rem; font-weight: bold; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">{low_stock_items:,d}</div>
-                        <div style="font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Low Stock Items</div>
-                    </div>
-                </div>
+                st.metric("Inventory Status", status_text)
                 
-                <div style="margin-top: 10px; font-size: 0.9rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif; padding-bottom: 10px;">
-                    <a href="pages/01_inventory.py" style="color: white; text-decoration: underline; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">View details in Inventory Management</a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=320)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Stock Quantity", f"{total_quantity:,.2f}")
+                with col2:
+                    st.metric("Low Stock Items", f"{low_stock_items:,d}")
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown(f'<div class="btn-{get_button_class(status_text)}">', unsafe_allow_html=True)
+                    if st.button("View details in Inventory", key="inventory_btn"):
+                        st.switch_page("pages/01_inventory.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
-            # Gray gradient for no data
-            html_content = """
-            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #607D8B, #455A64); 
-                        color: white; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 5px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">Inventory Status: No Data</div>
-                <div style="font-size: 1.5rem; margin-bottom: 15px; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">No inventory data available</div>
-                <div style="margin-top: 10px; font-size: 0.9rem; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif; padding-bottom: 10px;">
-                    <a href="pages/01_inventory.py" style="color: white; text-decoration: underline; font-family: 'Poppins', 'Segoe UI', 'Roboto', sans-serif;">View details in Inventory Management</a>
-                </div>
-            </div>
-            """
-            import streamlit.components.v1 as components
-            components.html(html_content, height=320)
+            # Gray container for no data
+            with st.container():
+                st.markdown('<div class="metric-card status-neutral">', unsafe_allow_html=True)
+                
+                st.metric("Inventory Status", "No Data")
+                st.markdown("<p class='metric-subtitle'>No inventory data available</p>", unsafe_allow_html=True)
+                
+                # Navigation button
+                btn_container = st.container()
+                with btn_container:
+                    st.markdown('<div class="btn-neutral">', unsafe_allow_html=True)
+                    if st.button("View details in Inventory", key="inventory_no_data_btn"):
+                        st.switch_page("pages/01_inventory.py")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
         logger.error(f"Error loading inventory status metrics: {e}")
         st.error("Error loading inventory data")
@@ -478,18 +583,18 @@ def main():
             
             # Footer
             st.sidebar.markdown("---")
-            st.sidebar.caption("© 2025 SPATRAC")
+            st.sidebar.caption(" 2025 SPATRAC")
         
         # Check database connection
         db_connected = check_database_connection()
         if not db_connected:
-            st.error("❌ Database connection failed. Please check your database configuration.")
+            st.error(" Database connection failed. Please check your database configuration.")
             st.stop()
         
         # Check required tables
         tables_exist = check_required_tables()
         if not tables_exist:
-            st.warning("⚠️ Some required database tables are missing. The application may not function correctly.")
+            st.warning(" Some required database tables are missing. The application may not function correctly.")
         
         # Display the dashboard home
         dashboard_home()

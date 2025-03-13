@@ -1,0 +1,38 @@
+# GitHub Repository Push Instructions
+
+After creating your GitHub repository, run the following commands to push your local repository:
+
+## If you created a repository named "SPATRAC-Rebuild" under your GitHub username:
+
+```bash
+# Add the GitHub repository as a remote
+git remote add origin https://github.com/Manakin-Wraith/SPATRAC-Rebuild.git
+
+# Push your local repository to GitHub
+git push -u origin main
+```
+
+Replace "YOUR_USERNAME" with your actual GitHub username.
+
+## If you're using SSH instead of HTTPS:
+
+```bash
+# Add the GitHub repository as a remote using SSH
+git remote add origin git@github.com:YOUR_USERNAME/SPATRAC-Rebuild.git
+
+# Push your local repository to GitHub
+git push -u origin main
+```
+
+## If you encounter authentication issues:
+
+For HTTPS connections, you may need to use a personal access token instead of your password.
+Visit: https://github.com/settings/tokens to create a token with the "repo" scope.
+
+## To verify your remote repository is set up correctly:
+
+```bash
+git remote -v
+```
+
+This should display the URLs for your remote repository.
